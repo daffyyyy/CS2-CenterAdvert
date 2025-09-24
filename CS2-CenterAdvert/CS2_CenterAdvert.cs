@@ -10,12 +10,13 @@ namespace CS2_CenterAdvert;
 public sealed class CS2_CenterAdvert : BasePlugin, IPluginConfig<AdvertConfig>
 {
     public AdvertConfig Config { get; set; }
-    private readonly List<CCSPlayerController> _players = [];
+    
+    private readonly HashSet<CCSPlayerController> _players = [];
     private List<int> _shuffledIndexes = [];
     private int _currentAdvertIndex = -1;
     
     public override string ModuleName => "CS2-CenterAdvert";
-    public override string ModuleVersion => "1.0.0";
+    public override string ModuleVersion => "1.0.1";
     public override string ModuleAuthor => "daffyy";
 
     public override void Load(bool hotReload)
@@ -26,15 +27,24 @@ public sealed class CS2_CenterAdvert : BasePlugin, IPluginConfig<AdvertConfig>
             _shuffledIndexes.Clear();
             _currentAdvertIndex = -1;
             
-            var players = Utilities.GetPlayers().Where(p => p.IsValid && !p.IsBot).ToList();
+            var players = Utilities.GetPlayers()
+                .Where(p => p.IsValid && !p.IsBot)
+                .Where(p => !Config.ExcludeSpectators || p.TeamNum > 1)
+                .ToList();
+            
             foreach (var player in players)
             {
-                    _players.Add(player);
+                _players.Add(player);
             }
         }
-            
-        AddTimer(0.1f, Advert, TimerFlags.REPEAT);
-        AddTimer(5.0f, RotateAdvert, TimerFlags.REPEAT);
+
+
+        if (Config.Adverts.Any(a => a.Image))
+            RegisterListener<Listeners.OnTick>(Advert);
+        else
+            AddTimer(0.1f, Advert, TimerFlags.REPEAT);
+        
+        AddTimer(Config.Time, RotateAdvert, TimerFlags.REPEAT);
     }
 
     private void RotateAdvert()
@@ -135,4 +145,23 @@ public sealed class CS2_CenterAdvert : BasePlugin, IPluginConfig<AdvertConfig>
         return HookResult.Continue;
     }
     
+    [GameEventHandler]
+    public HookResult EventPlayerTeam(EventPlayerTeam @event, GameEventInfo _)
+    {
+        var player = @event.Userid;
+        if (player == null || !player.IsValid || player.IsBot)
+            return HookResult.Continue;
+        
+        if (Config.ExcludeSpectators && @event.Team <= 1)
+            _players.Remove(player);
+        else
+            _players.Add(player);
+        
+        return HookResult.Continue;
+    }
+
+    public override void Unload(bool hotReload)
+    {
+        RemoveListener<Listeners.OnTick>(Advert);
+    }
 }
