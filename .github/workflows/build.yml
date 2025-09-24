@@ -14,7 +14,8 @@ env:
   BUILD_NUMBER: ${{ github.run_number }}
   PROJECT_PATH: "CS2-CenterAdvert/CS2-CenterAdvert.csproj"
   PROJECT_NAME: "CS2-CenterAdvert"
-  OUTPUT_PATH: "./CS2-CenterAdvert"
+  OUTPUT_PATH: "./build_output"
+  PLUGINS_PATH: "addons/counterstrikesharp/plugins"
 
 jobs:
   build:
@@ -30,7 +31,7 @@ jobs:
     - name: Restore
       run: dotnet restore
     - name: Build
-      run: dotnet build ${{ env.PROJECT_PATH }} -c CS2-CenterAdvert -o ${{ env.OUTPUT_PATH }}
+      run: dotnet build ${{ env.PROJECT_PATH }} -c Release -o ${{ env.OUTPUT_PATH }}/bin
 
   publish:
     if: github.event_name == 'push'
@@ -46,25 +47,30 @@ jobs:
     - name: Restore
       run: dotnet restore
     - name: Build
-      run: dotnet build ${{ env.PROJECT_PATH }} -c CS2-CenterAdvert -o ${{ env.OUTPUT_PATH }}
+      run: dotnet build ${{ env.PROJECT_PATH }} -c Release -o ${{ env.OUTPUT_PATH }}/bin
     - name: Clean files
       run: |
         rm -f \
-          ${{ env.OUTPUT_PATH }}/CounterStrikeSharp.API.dll \
-          ${{ env.OUTPUT_PATH }}/McMaster.NETCore.Plugins.dll \
-          ${{ env.OUTPUT_PATH }}/Microsoft.Extensions.DependencyModel.dll \
-    - name: Zip
-      uses: thedoctor0/zip-release@0.7.5
-      with:
-        type: 'zip'
-        filename: '${{ env.PROJECT_NAME }}.zip'
-        path: ${{ env.OUTPUT_PATH }}
-    - name: CS2-CenterAdvert
+          ${{ env.OUTPUT_PATH }}/bin/CounterStrikeSharp.API.dll \
+          ${{ env.OUTPUT_PATH }}/bin/McMaster.NETCore.Plugins.dll \
+          ${{ env.OUTPUT_PATH }}/bin/Microsoft.Extensions.DependencyModel.dll \
+    - name: Create plugin directory structure
+      run: |
+        mkdir -p ${{ env.OUTPUT_PATH }}/${{ env.PLUGINS_PATH }}/${{ env.PROJECT_NAME }}
+        cp -r ${{ env.OUTPUT_PATH }}/bin/* ${{ env.OUTPUT_PATH }}/${{ env.PLUGINS_PATH }}/${{ env.PROJECT_NAME }}/
+    - name: Zip with proper structure
+      run: |
+        cd ${{ env.OUTPUT_PATH }}
+        zip -r ../${{ env.PROJECT_NAME }}.zip addons/
+    - name: Create Release
       uses: ncipollo/release-action@v1.12.0
       with:
         artifacts: "${{ env.PROJECT_NAME }}.zip"
         name: "Build ${{ env.BUILD_NUMBER }}"
         tag: "build-${{ env.BUILD_NUMBER }}"
         body: |
-          Place the plugin in game/csgo/addons/counterstrikesharp/plugins/CS2-CenterAdvert
-          After first launch, u need to configure plugin in  addons/counterstrikesharp/configs/plugins/CS2-CenterAdvert/CS2-CenterAdvert.json
+          The plugin will be installed to:
+          `addons/counterstrikesharp/plugins/CS2-CenterAdvert/`
+          
+          After first launch, configure the plugin in:
+          `addons/counterstrikesharp/configs/plugins/CS2-CenterAdvert/CS2-CenterAdvert.json`
