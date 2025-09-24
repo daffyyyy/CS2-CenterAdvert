@@ -12,7 +12,7 @@ on:
 
 env:
   BUILD_NUMBER: ${{ github.run_number }}
-  PROJECT_PATH: "CS2-CenterAdvert.csproj"
+  PROJECT_PATH: "CS2-CenterAdvert/CS2-CenterAdvert.csproj"
   PROJECT_NAME: "CS2-CenterAdvert"
   OUTPUT_PATH: "./CS2-CenterAdvert"
 
