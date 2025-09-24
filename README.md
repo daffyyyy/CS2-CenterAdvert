@@ -8,6 +8,7 @@ A CounterStrikeSharp plugin for Counter-Strike 2 servers that displays customiza
 - **Flexible Configuration**: Easy setup via config file
 - **Random Order**: Option to randomize advertisement display order
 - **Spectator Control**: Exclude spectators from seeing advertisements
+- **Alive control**: Exclude alive players from seeing advertisements
 - **Custom Timing**: Configurable display intervals
 - **Enable/Disable**: Toggle individual advertisements on/off
 
@@ -18,6 +19,7 @@ A CounterStrikeSharp plugin for Counter-Strike 2 servers that displays customiza
   "RandomOrder": true, // Randomnize adverts order
   "Time": 5, // Time to switch to next advert
   "ExcludeSpectators": true, // Exclude spectators from seeing ads
+  "ExcludeAlive": true, // Exclude alive players from seeing ads
   "Adverts": [
     {
       "Message": "Welcome to the server! 🎮",

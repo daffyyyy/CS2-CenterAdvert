@@ -4,10 +4,11 @@ namespace CS2_CenterAdvert;
 
 public class AdvertConfig : IBasePluginConfig
 {
-    public int Version { get; set; } = 2;
+    public int Version { get; set; } = 3;
     public bool RandomOrder { get; set; } = true;
     public int Time { get; set; } = 5;
     public bool ExcludeSpectators { get; set; } = true;
+    public bool ExcludeAlive { get; set; } = true;
     
     public List<Advert> Adverts { get; set; } =
     [

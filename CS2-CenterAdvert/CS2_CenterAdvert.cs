@@ -16,7 +16,7 @@ public sealed class CS2_CenterAdvert : BasePlugin, IPluginConfig<AdvertConfig>
     private int _currentAdvertIndex = -1;
     
     public override string ModuleName => "CS2-CenterAdvert";
-    public override string ModuleVersion => "1.0.1";
+    public override string ModuleVersion => "1.0.2";
     public override string ModuleAuthor => "daffyy";
 
     public override void Load(bool hotReload)
@@ -109,8 +109,10 @@ public sealed class CS2_CenterAdvert : BasePlugin, IPluginConfig<AdvertConfig>
             if (player?.IsValid != true) continue;
             if (MenuManager.GetActiveMenu(player) != null) continue;
 
-            if (player.PlayerPawn.Value?.LifeState == (int)LifeState_t.LIFE_DEAD)
-                player.PrintToCenterHtml(advert.Message);
+            if (Config.ExcludeAlive && player.PlayerPawn.Value?.LifeState != (int)LifeState_t.LIFE_DEAD)
+                continue;
+            
+            player.PrintToCenterHtml(advert.Message);
         }
     }
 
